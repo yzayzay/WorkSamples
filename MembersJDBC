@@ -1,0 +1,184 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class MemberJDBC {
+
+    // adds a member if does not exist otherwise return its id
+    public int addMember(String fName, String lName, String street,
+                         String city, String phone, Date startDate)
+            throws FileNotFoundException, IOException, SQLException {
+        // before adding get a member by infos if exists
+        int generatedMemberId = getMemberId(fName, lName, street, city, phone,
+                startDate);
+
+        // no member exists so we add the new member
+        if (generatedMemberId == -1) {
+            DbConnection dbConnection = DbConnection.accessDbConnection();
+            // create statement
+            PreparedStatement statement = null;
+            try {
+                statement = dbConnection
+                        .getConnection()
+                        .prepareStatement(
+                                "INSERT INTO member VALUES(NEXT VALUE FOR member_seq,?,?,?,?,?,?)");
+                statement.setString(1, fName);
+                statement.setString(2, lName);
+                statement.setString(3, street);
+                statement.setString(4, city);
+                statement.setString(5, phone);
+                statement.setDate(6, new java.sql.Date(startDate.getTime()));
+                statement.executeUpdate();
+
+                Statement stmt = dbConnection.getConnection().createStatement();
+                ResultSet rs = stmt.executeQuery("select MAX("
+                        + VidTable.MEMBER_KEY + ") from member");
+                if (rs.next()) {
+                    generatedMemberId = rs.getInt(VidTable.MEMBER_ID_COLUMN);
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem when executing query: %s\n", msg);
+            } finally {
+                try {
+                    if (statement != null) {
+                        statement.close();
+                    }
+                } catch (SQLException ex) {
+                    String msg = ex.getMessage();
+                    System.err.printf(
+                            "problem with when closing statement: %s\n", msg);
+                }
+            }
+        }
+        return generatedMemberId;
+    }
+
+    // retrieves a member based on its informations return -1 if no one exists
+    public int getMemberId(String fName, String lName, String street,
+                           String city, String phone, Date startDate)
+            throws FileNotFoundException, IOException, SQLException {
+        int memberId = -1;
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection.getConnection().prepareStatement(
+                    "SELECT " + VidTable.MEMBER_KEY + " FROM member WHERE "
+                            + VidTable.MEMBER_FNAME_KEY + "=? AND "
+                            + VidTable.MEMBER_LNAME_KEY + "=? AND "
+                            + VidTable.MEMBER_STREET_KEY + "=? AND "
+                            + VidTable.MEMBER_CITY_KEY + "=? AND "
+                            + VidTable.MEMBER_PHONE_KEY + "=? AND "
+                            + VidTable.MEMBER_START_DATE_KEY + "=?");
+            statement.setString(1, fName);
+            statement.setString(2, lName);
+            statement.setString(3, street);
+            statement.setString(4, city);
+            statement.setString(5, phone);
+            statement.setDate(6, new java.sql.Date(startDate.getTime()));
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                memberId = rs.getInt(VidTable.MEMBER_ID_COLUMN);
+            }
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return memberId;
+    }
+
+    // retrieves a member by id
+    public Member getMember(int memberId)
+            throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection.getConnection().prepareStatement(
+                    "SELECT * FROM member WHERE "
+                            + VidTable.MEMBER_KEY + "=?");
+            statement.setInt(1, memberId);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                Member member = new Member();
+                member.setMemberId(memberId);
+                member.setfName(rs.getString(VidTable.FNAME));
+                member.setlName(rs.getString(VidTable.LNAME));
+                member.setStreet(rs.getString(VidTable.STREET));
+                member.setCity(rs.getString(VidTable.CITY));
+                member.setPhone(rs.getString(VidTable.PHONE));
+                member.setStartDate(rs.getDate(VidTable.START_DATE));
+                return member;
+            }
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return null;
+    }
+
+    // retrieves all members
+    public List<Member> getAllMembers()
+            throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        Statement statement = null;
+        List<Member> members = new ArrayList<Member>();
+        try {
+            statement = dbConnection.getConnection().createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM member");
+            while(rs.next()) {
+                Member member = new Member();
+                member.setMemberId(rs.getInt(VidTable.MEMBER_ID_COLUMN));
+                member.setfName(rs.getString(VidTable.FNAME));
+                member.setlName(rs.getString(VidTable.LNAME));
+                member.setStreet(rs.getString(VidTable.STREET));
+                member.setCity(rs.getString(VidTable.CITY));
+                member.setPhone(rs.getString(VidTable.PHONE));
+                member.setStartDate(rs.getDate(VidTable.START_DATE));
+                members.add(member);
+            }
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return members;
+    }
+}
