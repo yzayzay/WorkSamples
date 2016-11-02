@@ -1,0 +1,21 @@
+public class UserOptions {
+
+    public static int EXIT_OPTION = 0;
+
+    public static int LIST_ALL_MEMBERS = 1;
+
+    public static int UPDATE_MEMBER_DATA = 2;
+
+    public static int LIST_ALL_TITLES = 3;
+
+    public static int CHECK_OUT_TITLE = 4;
+
+    public static int CHECK_IN_TITLE = 5;
+
+    public static int LIST_CHECKED_OUT_TITLES_FOR_MEMBER = 6;
+
+    public static int LIST_CHECKED_OUT_COPIES = 7;
+
+    public static int LIST_CHECKED_IN_COPIES = 8;
+
+}
