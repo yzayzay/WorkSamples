@@ -1,0 +1,208 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+
+public class Member {
+
+    private int memberId;
+    private String fName;
+    private String lName;
+    private String street;
+    private String city;
+    private String phone;
+    private Date startDate;
+
+
+    public void checkOut(Title title) throws FileNotFoundException, IOException, SQLException{
+        //copy in store's id for title
+        CopyJDBC copyJDBC = new CopyJDBC();
+        int copyId = copyJDBC.getCopyIdInStoreByTitle(title.getTitleId());
+        if(copyId == -1){
+            System.out.println("No available copy in store for title : " + title.getTitleName());
+        } else {
+            copyJDBC.makeCopyOutOfStore(copyId);
+            new RentalJDBC().addRental(copyId, memberId);
+        }
+    }
+
+    public void checkIn(Title title) throws FileNotFoundException, IOException, SQLException{
+        //copy in store's id for title
+        CopyJDBC copyJDBC = new CopyJDBC();
+        int copyId = copyJDBC.getCopyIdOutStoreByTitleAndMember(title.getTitleId(),memberId);
+        if(copyId == -1){
+            System.out.println("No available copy out of store for title : " + title.getTitleName() + " and member : " + fName + " " + lName);
+        } else {
+            copyJDBC.makeCopyInStore(copyId);
+            new RentalJDBC().checkInCopyRental(copyId, memberId);
+        }
+    }
+
+    public List<Title> getCheckedOutTitles() throws FileNotFoundException, IOException, SQLException{
+        TitleJDBC titleJDBC = new TitleJDBC();
+        List<Title> titles = new ArrayList<Title>();
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection
+                    .getConnection()
+                    .prepareStatement(
+                            "SELECT DISTINCT title.* FROM Rental AS rental JOIN Copy AS copy ON rental.copy_id = copy.copy_id JOIN Title AS title ON copy.title_id = title.title_id WHERE rental.member_id = ? and checkin_Date IS NULL");
+            statement.setInt(1, memberId);
+            ResultSet rs = statement.executeQuery();
+            while(rs.next()) {
+                titles.add(titleJDBC.getTitleFromResultSet(rs, dbConnection));
+            }
+
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf(
+                        "problem with when closing statement: %s\n", msg);
+            }
+        }
+        return titles;
+    }
+
+
+    public void updateMember() throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection
+                    .getConnection()
+                    .prepareStatement(
+                            "UPDATE member set fname=? , lname=? , street=? , city=? , phone=? WHERE member_id=?");
+            statement.setString(1, fName);
+            statement.setString(2, lName);
+            statement.setString(3, street);
+            statement.setString(4, city);
+            statement.setString(5, phone);
+            statement.setInt(6, memberId);
+            statement.executeUpdate();
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf(
+                        "problem with when closing statement: %s\n", msg);
+            }
+        }
+    }
+
+    /**
+     * @return the memberId
+     */
+    public int getMemberId() {
+        return memberId;
+    }
+    /**
+     * @param memberId the memberId to set
+     */
+    public void setMemberId(int memberId) {
+        this.memberId = memberId;
+    }
+    /**
+     * @return the fName
+     */
+    public String getfName() {
+        return fName;
+    }
+    /**
+     * @param fName the fName to set
+     */
+    public void setfName(String fName) {
+        this.fName = fName;
+    }
+    /**
+     * @return the lName
+     */
+    public String getlName() {
+        return lName;
+    }
+    /**
+     * @param lName the lName to set
+     */
+    public void setlName(String lName) {
+        this.lName = lName;
+    }
+    /**
+     * @return the street
+     */
+    public String getStreet() {
+        return street;
+    }
+    /**
+     * @param street the street to set
+     */
+    public void setStreet(String street) {
+        this.street = street;
+    }
+    /**
+     * @return the city
+     */
+    public String getCity() {
+        return city;
+    }
+    /**
+     * @param city the city to set
+     */
+    public void setCity(String city) {
+        this.city = city;
+    }
+    /**
+     * @return the phone
+     */
+    public String getPhone() {
+        return phone;
+    }
+    /**
+     * @param phone the phone to set
+     */
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+    /**
+     * @return the startDate
+     */
+    public Date getStartDate() {
+        return startDate;
+    }
+    /**
+     * @param startDate the startDate to set
+     */
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Member [memberId=" + memberId + ", fName=" + fName + ", lName="
+                + lName + ", street=" + street + ", city=" + city + ", phone="
+                + phone + ", startDate=" + startDate + "]";
+    }
+
+}
