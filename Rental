@@ -1,0 +1,62 @@
+import java.util.Date;
+
+
+public class Rental {
+
+    private Date checkoutDate;
+    private int copyId;
+    private int memberId;
+    private Date checkInDate;
+
+
+    /**
+     * @return the checkoutDate
+     */
+    public Date getCheckoutDate() {
+        return checkoutDate;
+    }
+    /**
+     * @param checkoutDate the checkoutDate to set
+     */
+    public void setCheckoutDate(Date checkoutDate) {
+        this.checkoutDate = checkoutDate;
+    }
+
+    /**
+     * @return the copyId
+     */
+    public int getCopyId() {
+        return copyId;
+    }
+    /**
+     * @param copyId the copyId to set
+     */
+    public void setCopyId(int copyId) {
+        this.copyId = copyId;
+    }
+    /**
+     * @return the memberId
+     */
+    public int getMemberId() {
+        return memberId;
+    }
+    /**
+     * @param memberId the memberId to set
+     */
+    public void setMemberId(int memberId) {
+        this.memberId = memberId;
+    }
+    /**
+     * @return the checkInDate
+     */
+    public Date getCheckInDate() {
+        return checkInDate;
+    }
+    /**
+     * @param checkInDate the checkInDate to set
+     */
+    public void setCheckInDate(Date checkInDate) {
+        this.checkInDate = checkInDate;
+    }
+
+}
