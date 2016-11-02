@@ -1,0 +1,80 @@
+import java.util.Date;
+import java.util.List;
+
+
+public class Title {
+
+    private int titleId;
+
+    private String titleName;
+
+    private Date publishedDate;
+
+    private List<Integer> copyIds;
+
+    /**
+     * @return the titleId
+     */
+    public int getTitleId() {
+        return titleId;
+    }
+
+    /**
+     * @param titleId the titleId to set
+     */
+    public void setTitleId(int titleId) {
+        this.titleId = titleId;
+    }
+
+    /**
+     * @return the titleName
+     */
+    public String getTitleName() {
+        return titleName;
+    }
+
+    /**
+     * @param titleName the titleName to set
+     */
+    public void setTitleName(String titleName) {
+        this.titleName = titleName;
+    }
+
+    /**
+     * @return the publishedDate
+     */
+    public Date getPublishedDate() {
+        return publishedDate;
+    }
+
+    /**
+     * @param publishedDate the publishedDate to set
+     */
+    public void setPublishedDate(Date publishedDate) {
+        this.publishedDate = publishedDate;
+    }
+
+    /**
+     * @return the copyIds
+     */
+    public List<Integer> getCopyIds() {
+        return copyIds;
+    }
+
+    /**
+     * @param copyIds the copyIds to set
+     */
+    public void setCopyIds(List<Integer> copyIds) {
+        this.copyIds = copyIds;
+    }
+
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "com.company.Title [titleId=" + titleId + ", titleName=" + titleName
+                + ", publishedDate=" + publishedDate + ", copyIds=" + copyIds
+                + "]";
+    }
+}
