@@ -1,0 +1,321 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Scanner;
+
+
+public class VideoStoreTest
+{
+
+     public static void main(String[] args) throws FileNotFoundException, IOException, SQLException
+    {
+
+        MemberJDBC memberJDBC = new MemberJDBC();
+        TitleJDBC titleJDBC = new TitleJDBC();
+        List<Member> members = memberJDBC.getAllMembers();
+        List<Title> titles = titleJDBC.getAllTitles();
+
+        int userOption = getUserOption();
+        while(userOption != 0)
+        {
+
+            switch (userOption)
+            {
+                case 1:
+                    listAllMembers(members);
+                    break;
+                case 2:
+                    updateMemberInformations(members);
+                    break;
+                case 3:
+                    listAllTitles(titles);
+                    break;
+                case 4:
+                    checkedOutTitle(members, titles);
+                    break;
+                case 5:
+                    checkedInTitle(members, titles);
+                    break;
+                case 6:
+                    listAllCheckedOutTitles(members);
+                    break;
+                case 7:
+                    listAllCheckedOutCopies(titles);
+                    break;
+                case 8:
+                    listAllCheckedInCopies(titles);
+                    break;
+            }
+            userOption = getUserOption();
+        }
+    }
+
+
+    //allows to get an option selected by the user
+    public static int getUserOption()
+    {
+        Scanner keybd = new Scanner(System.in);
+        int option = -1;
+        System.out.println();
+        System.out.println();
+        System.out.println("########## MENU OPTIONS ##########");
+        System.out.println("==> Exit : [" + UserOptions.EXIT_OPTION +"]");
+        System.out.println("==> List all members : [" + UserOptions.LIST_ALL_MEMBERS + "]");
+        System.out.println("==> Update member information : [" + UserOptions.UPDATE_MEMBER_DATA + "]");
+        System.out.println("==> List all titles : [" + UserOptions.LIST_ALL_TITLES + "]");
+        System.out.println("==> Check out title : [" + UserOptions.CHECK_OUT_TITLE + "]");
+        System.out.println("==> Check in title : [" + UserOptions.CHECK_IN_TITLE + "]");
+        System.out.println("==> List all checked out titles for a member: [" + UserOptions.LIST_CHECKED_OUT_TITLES_FOR_MEMBER + "]");
+        System.out.println("==> List all checked out copies for a title: [" + UserOptions.LIST_CHECKED_OUT_COPIES + "]");
+        System.out.println("==> List all checked in copies for a title: [" + UserOptions.LIST_CHECKED_IN_COPIES + "]");
+
+        while(option < 0 || option > 8)
+        {
+            System.out.println("======> Select an option (0 - 8): ");
+            option = keybd.nextInt();
+        }
+        return option;
+    }
+
+    public static void listAllMembers(List<Member> members)
+    {
+        System.out.println("############# MEMBERS #############");
+        for (Member member : members)
+        {
+            System.out.println(member);
+        }
+    }
+
+    public static void listAllTitles(List<Title> titles)
+    {
+        System.out.println("############# Titles #############");
+        for (Title title : titles)
+        {
+            System.out.println(title);
+        }
+    }
+
+    private static void updateMemberInformations(List<Member> members) throws IOException, SQLException
+    {
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# Update member informations #############");
+        System.out.println("Select the id of the member : ");
+        int selectedMemberId = keybd.nextInt();
+        Member selectedMember = null;
+        for(Member member : members)
+        {
+            if(member.getMemberId() == selectedMemberId)
+            {
+                selectedMember = member;
+                break;
+            }
+        }
+        if(selectedMember != null)
+        {
+            System.out.println("new member firstname : ");
+            String newFName = keybd.next();
+            System.out.println("new member lastname : ");
+            String newLName = keybd.next();
+            System.out.println("new member street : ");
+            String newStreet = keybd.next();
+            System.out.println("new member city : ");
+            String newCity = keybd.next();
+            System.out.println("new member phone : ");
+            String newPhone = keybd.next();
+            selectedMember.setfName(newFName);
+            selectedMember.setlName(newLName);
+            selectedMember.setStreet(newStreet);
+            selectedMember.setCity(newCity);
+            selectedMember.setPhone(newPhone);
+            selectedMember.updateMember();
+        }
+        else
+        {
+            System.out.println("No member with the selected id");
+        }
+
+    }
+
+    private static void checkedOutTitle(List<Member> members, List<Title> titles) throws FileNotFoundException, IOException, SQLException
+    {
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# checkout title #############");
+        System.out.println("Select the id of the member : ");
+        int selectedMemberId = keybd.nextInt();
+        System.out.println("Select the id of the title : ");
+        int selectedTitleId = keybd.nextInt();
+        Member selectedMember = null;
+        for(Member member : members){
+            if(member.getMemberId() == selectedMemberId)
+            {
+                selectedMember = member;
+                break;
+            }
+        }
+
+        Title selectedTitle = null;
+        for(Title title : titles)
+        {
+            if(title.getTitleId() == selectedTitleId)
+            {
+                selectedTitle = title;
+                break;
+            }
+        }
+        if(selectedMember != null)
+        {
+            if(selectedTitle != null)
+            {
+                selectedMember.checkOut(selectedTitle);
+                System.out.println("Done");
+            } else
+            {
+                System.out.println("No Title with the selected id");
+            }
+        }
+        else
+        {
+            System.out.println("No member with the selected id");
+        }
+
+    }
+
+    private static void checkedInTitle(List<Member> members, List<Title> titles) throws FileNotFoundException,  IOException, SQLException
+    {
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# checkin title #############");
+        System.out.println("Select the id of the member : ");
+        int selectedMemberId = keybd.nextInt();
+        System.out.println("Select the id of the title : ");
+        int selectedTitleId = keybd.nextInt();
+        Member selectedMember = null;
+        for(Member member : members)
+        {
+            if(member.getMemberId() == selectedMemberId)
+            {
+                selectedMember = member;
+                break;
+            }
+        }
+        Title selectedTitle = null;
+        for(Title title : titles)
+        {
+            if(title.getTitleId() == selectedTitleId)
+            {
+                selectedTitle = title;
+                break;
+            }
+        }
+        if(selectedMember != null)
+        {
+            if(selectedTitle != null)
+            {
+                selectedMember.checkIn(selectedTitle);
+                System.out.println("Done");
+            } else
+            {
+                System.out.println("No Title with the selected id");
+            }
+        }
+        else
+        {
+            System.out.println("No member with the selected id");
+        }
+    }
+
+    private static void listAllCheckedOutTitles(List<Member> members) throws FileNotFoundException, IOException, SQLException
+    {
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# Listing checkedout titles #############");
+        System.out.println("Select the id of the member : ");
+        int selectedMemberId = keybd.nextInt();
+        Member selectedMember = null;
+        for(Member member : members)
+        {
+            if(member.getMemberId() == selectedMemberId)
+            {
+                selectedMember = member;
+                break;
+            }
+        }
+        if(selectedMember != null)
+        {
+            System.out.println("== List of checked out titles for member : " + selectedMember.getfName() + " " + selectedMember.getlName()  + " ==");
+            List<Title> checkoutTitles = selectedMember.getCheckedOutTitles();
+            for(Title title : checkoutTitles)
+            {
+                System.out.println(title);
+            }
+        }
+        else
+        {
+            System.out.println("No member with the selected id");
+        }
+
+    }
+
+    private static void listAllCheckedOutCopies(List<Title> titles) throws FileNotFoundException, IOException, SQLException
+    {
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# all checked out copies for title #############");
+        System.out.println("Select the id of the title : ");
+        int selectedTitleId = keybd.nextInt();
+
+        Title selectedTitle = null;
+        for(Title title : titles)
+        {
+            if(title.getTitleId() == selectedTitleId)
+            {
+                selectedTitle = title;
+                break;
+            }
+        }
+        if(selectedTitle != null)
+        {
+            List<Copy> checkedOutCopies =  new CopyJDBC().getAllCheckedOutCopiesForTitle(selectedTitleId);
+            for(Copy copy : checkedOutCopies)
+            {
+                System.out.println(copy);
+            }
+            System.out.println("Done");
+        }
+        else
+        {
+            System.out.println("No Title with the selected id");
+        }
+    }
+
+    private static void listAllCheckedInCopies(List<Title> titles) throws FileNotFoundException, IOException, SQLException
+    {
+
+        Scanner keybd = new Scanner(System.in);
+        System.out.println("############# all checked in copies for title #############");
+        System.out.println("Select the id of the title : ");
+        int selectedTitleId = keybd.nextInt();
+
+        Title selectedTitle = null;
+        for(Title title : titles)
+        {
+            if(title.getTitleId() == selectedTitleId)
+            {
+                selectedTitle = title;
+                break;
+            }
+        }
+        if(selectedTitle != null)
+        {
+            List<Copy> checkedOutCopies =  new CopyJDBC().getAllCheckedInCopiesForTitle(selectedTitleId);
+            for(Copy copy : checkedOutCopies)
+            {
+                System.out.println(copy);
+            }
+            System.out.println("Done");
+        }
+        else
+        {
+            System.out.println("No Title with the selected id");
+        }
+    }
+
+}
