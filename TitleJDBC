@@ -1,0 +1,111 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class TitleJDBC {
+
+
+    // retrieves a title by id
+    public Title getTitle(int titleId)
+            throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection.getConnection().prepareStatement(
+                    "SELECT * FROM title WHERE "
+                            + VidTable.TITLE_KEY + "=?");
+            statement.setInt(1, titleId);
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                return getTitleFromResultSet(rs, dbConnection);
+            }
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return null;
+    }
+
+    public Title getTitleFromResultSet(ResultSet rs, DbConnection dbConnection) throws SQLException
+    {
+        Title title = new Title();
+        title.setTitleId(rs.getInt(VidTable.TITLE_ID));
+        title.setTitleName(rs.getString(VidTable.TITLE_NAME));
+        title.setPublishedDate(rs.getDate(VidTable.PUB_DATE));
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection.getConnection().prepareStatement(
+                    "SELECT COPY_ID FROM copy WHERE "
+                            + VidTable.TITLE_KEY + "=?");
+            statement.setInt(1, title.getTitleId());
+            ResultSet rsCopy = statement.executeQuery();
+            List<Integer> copyIds = new ArrayList<Integer>();
+            while (rsCopy.next()) {
+                copyIds.add(rsCopy.getInt(VidTable.COPY_KEY));
+            }
+            title.setCopyIds(copyIds);
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return title;
+    }
+
+    // retrieves all titles
+    public List<Title> getAllTitles()
+            throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        Statement statement = null;
+        List<Title> titles = new ArrayList<Title>();
+        try {
+            statement = dbConnection.getConnection().createStatement();
+            ResultSet rs = statement.executeQuery("SELECT * FROM title");
+            while(rs.next()) {
+                titles.add(getTitleFromResultSet(rs, dbConnection));
+            }
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf("problem with when closing statement: %s\n",
+                        msg);
+            }
+        }
+        return titles;
+    }
+}
