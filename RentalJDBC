@@ -1,0 +1,73 @@
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
+
+public class RentalJDBC {
+
+    // adds rental
+    public void addRental(int copyID, int memberID)
+            throws FileNotFoundException, IOException, SQLException {
+
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection
+                    .getConnection()
+                    .prepareStatement(
+                            "INSERT INTO rental VALUES(?,?,?,?)");
+            statement.setDate(1, new java.sql.Date(new Date().getTime()));
+            statement.setInt(2, copyID);
+            statement.setInt(3, memberID);
+            statement.setDate(4, null);
+            statement.executeUpdate();
+
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf(
+                        "problem with when closing statement: %s\n", msg);
+            }
+        }
+    }
+
+    public void checkInCopyRental(int copyId, int memberId) throws FileNotFoundException, IOException, SQLException {
+        DbConnection dbConnection = DbConnection.accessDbConnection();
+        // create statement
+        PreparedStatement statement = null;
+        try {
+            statement = dbConnection
+                    .getConnection()
+                    .prepareStatement(
+                            "UPDATE rental SET checkin_Date=? WHERE copy_id=? and member_id=?");
+            statement.setDate(1, new java.sql.Date(new Date().getTime()));
+            statement.setInt(2, copyId);
+            statement.setInt(3, memberId);
+            statement.executeUpdate();
+
+        } catch (SQLException ex) {
+            String msg = ex.getMessage();
+            System.err.printf("problem when executing query: %s\n", msg);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException ex) {
+                String msg = ex.getMessage();
+                System.err.printf(
+                        "problem with when closing statement: %s\n", msg);
+            }
+        }
+    }
+}
+  
